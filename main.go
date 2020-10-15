@@ -58,23 +58,25 @@ func viewArticles(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		var afterID, limit int
-		for k, v := range r.URL.Query() {
-			if k == "after_id" {
-				afterID, _ = strconv.Atoi(v[0])
-			} else if k == "limit" {
-				limit, _ = strconv.Atoi(v[0])
+		if len(r.URL.Query())==0{
+			json.NewEncoder(w).Encode(articles)
+		}else{
+			for k, v := range r.URL.Query() {
+				if k == "after_id" {
+					afterID, _ = strconv.Atoi(v[0])
+				} else if k == "limit" {
+					limit, _ = strconv.Atoi(v[0])
+				}
 			}
-		}
-		fmt.Println(afterID)
-		fmt.Println(limit)
-		if afterID>=len(articles){
-			json.NewEncoder(w).Encode("incorrect query for paginantion, after_id has crossed it's limit")
-		}
-		w.WriteHeader(http.StatusOK)
-		if afterID+limit>len(articles){
-			json.NewEncoder(w).Encode(articles[afterID:])
-		}else {
-			json.NewEncoder(w).Encode(articles[afterID : afterID+limit])
+			if afterID>=len(articles){
+				json.NewEncoder(w).Encode("incorrect query for paginantion, after_id has crossed it's limit")
+			}
+			w.WriteHeader(http.StatusOK)
+			if afterID+limit>len(articles){
+				json.NewEncoder(w).Encode(articles[afterID:])
+			}else {
+				json.NewEncoder(w).Encode(articles[afterID : afterID+limit])
+			}
 		}
 	case "POST":
 		lock.Lock()
